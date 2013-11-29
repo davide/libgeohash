@@ -39,7 +39,7 @@ ADD_CUSTOM_TARGET(quiet
 #
 # Include paths
 include_directories(
-	${CMAKE_BINARY_DIR}/include
+	./include
 	)
 
 #
