@@ -26,6 +26,7 @@ THE SOFTWARE.
 #include <string.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <assert.h>
@@ -218,7 +219,7 @@ double
 GEOHASH_encode_double(double lat, double lon, unsigned int len)
 {
     unsigned int position;
-    unsigned long long int geohash = 0;
+    uint64_t geohash = 0;
     bool even = false;
     double mid = 0.0;
     GEOHASH_range lat_range = {  90,  -90 };
