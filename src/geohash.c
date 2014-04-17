@@ -25,13 +25,15 @@ THE SOFTWARE.
 #include <ctype.h>
 #include <string.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <assert.h>
 
 #include <geohash/geohash.h>
 
-#define MAX_HASH_LENGTH 22
+#define MAX_HASH_LENGTH 64
+#define HASH_BITS 5
 
 #define REFINE_RANGE(range, bits, offset) \
     if (((bits) & (offset)) == (offset)) \
@@ -51,6 +53,9 @@ THE SOFTWARE.
         (range)->max = mid; \
         (bits) |= (0x0 << (offset)); \
     }
+
+#define GET_HASH_BITS(geohash_double, hash_position) \
+    ((long long) geohash_double & (0xFF << (HASH_BITS * hash_position)))
 
 static const char BASE32_ENCODE_TABLE[33] = "0123456789bcdefghjkmnpqrstuvwxyz";
 static const char BASE32_DECODE_TABLE[44] = {
@@ -212,16 +217,12 @@ GEOHASH_encode(double lat, double lon, unsigned int len)
 double
 GEOHASH_encode_double(double lat, double lon, unsigned int len)
 {
-    unsigned int i, j;
-    int geohash_position;
-    long long geohash = 0;
-    unsigned char bits = 0;
+    unsigned int position;
+    unsigned long long geohash = 0;
+    bool even = false;
     double mid;
     GEOHASH_range lat_range = {  90,  -90 };
     GEOHASH_range lon_range = { 180, -180 };
-
-    double val1, val2, val_tmp;
-    GEOHASH_range *range1, *range2, *range_tmp;
 
     assert(lat >= -90.0);
     assert(lat <= 90.0);
@@ -229,32 +230,30 @@ GEOHASH_encode_double(double lat, double lon, unsigned int len)
     assert(lon <= 180.0);
     assert(len <= MAX_HASH_LENGTH);
 
-    val1 = lon; range1 = &lon_range;
-    val2 = lat; range2 = &lat_range;
-
-    geohash_position = 0;
-    for (i=0; i < len; i++) {
-
-        bits = 0;
-        SET_BIT(bits, mid, range1, val1, 4);
-        SET_BIT(bits, mid, range2, val2, 3);
-        SET_BIT(bits, mid, range1, val1, 2);
-        SET_BIT(bits, mid, range2, val2, 1);
-        SET_BIT(bits, mid, range1, val1, 0);
-
-        for (j = 0; j < 6; j++) {
-            geohash |= GET_BIT(bits, j) << (geohash_position + j);
+    mid = 0.0;
+    for (position = 0; position < len; position++) {
+        if (even) {
+            mid = (lon_range.max + lon_range.min) / 2.0;
+            if (lon > mid) {
+                geohash = ((geohash << 1) | 0x1);
+                lon_range.min = mid;
+            } else {
+                geohash = geohash << 1;
+                lon_range.max = mid;
+            }
+        } else {
+            mid = (lat_range.max + lat_range.min) / 2.0;
+            if (lat > mid) {
+                geohash = ((geohash << 1) | 0x1);
+                lat_range.min = mid;
+            } else {
+                geohash = geohash << 1;
+                lat_range.max = mid;
+            }
         }
-
-        val_tmp          = val1;
-        val1             = val2;
-        val2             = val_tmp;
-        range_tmp        = range1;
-        range1           = range2;
-        range2           = range_tmp;
-        geohash_position += 5;
+        even = !even;
     }
-
+    printf("%llx\n", geohash);
     return (double) geohash;
 }
 
