@@ -218,7 +218,7 @@ double
 GEOHASH_encode_double(double lat, double lon, unsigned int len)
 {
     unsigned int position;
-    unsigned long long geohash = 0;
+    unsigned long long int geohash = 0;
     bool even = false;
     double mid = 0.0;
     GEOHASH_range lat_range = {  90,  -90 };
@@ -234,7 +234,7 @@ GEOHASH_encode_double(double lat, double lon, unsigned int len)
         if (even) {
             mid = (lon_range.max + lon_range.min) / 2.0;
             if (lon > mid) {
-                geohash = ((geohash << 1) | 0x1);
+                geohash = ((geohash << 1) | 1);
                 lon_range.min = mid;
             } else {
                 geohash = geohash << 1;
@@ -243,7 +243,7 @@ GEOHASH_encode_double(double lat, double lon, unsigned int len)
         } else {
             mid = (lat_range.max + lat_range.min) / 2.0;
             if (lat > mid) {
-                geohash = ((geohash << 1) | 0x1);
+                geohash = ((geohash << 1) | 1);
                 lat_range.min = mid;
             } else {
                 geohash = geohash << 1;
