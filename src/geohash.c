@@ -220,7 +220,7 @@ GEOHASH_encode_double(double lat, double lon, unsigned int len)
     unsigned int position;
     unsigned long long geohash = 0;
     bool even = false;
-    double mid;
+    double mid = 0.0;
     GEOHASH_range lat_range = {  90,  -90 };
     GEOHASH_range lon_range = { 180, -180 };
 
@@ -230,7 +230,6 @@ GEOHASH_encode_double(double lat, double lon, unsigned int len)
     assert(lon <= 180.0);
     assert(len <= MAX_HASH_LENGTH);
 
-    mid = 0.0;
     for (position = 0; position < len; position++) {
         if (even) {
             mid = (lon_range.max + lon_range.min) / 2.0;
@@ -253,7 +252,6 @@ GEOHASH_encode_double(double lat, double lon, unsigned int len)
         }
         even = !even;
     }
-    printf("%llx\n", geohash);
     return (double) geohash;
 }
 
