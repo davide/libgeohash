@@ -34,6 +34,7 @@ set_target_properties(geohash_static
 
 install( TARGETS geohash_static
    ARCHIVE DESTINATION lib
+   LIBRARY DESTINATION lib
    PUBLIC_HEADER DESTINATION include
    )
 
